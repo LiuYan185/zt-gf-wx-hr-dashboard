@@ -85095,7 +85095,7 @@ function renderHealthTable(){
 function renderBuStaffChart(){
   var ctx = document.getElementById('chart-bu-staff');
   if(ctx._chart) ctx._chart.destroy();
-  var mSuffix = (currentFillMonth==='all'||parseInt(currentFillMonth)>5)?'':'_'+['jan','feb','mar','apr','may'][parseInt(currentFillMonth)-1];
+  var mSuffix = (currentFillMonth==='all'||parseInt(currentFillMonth)>6)?'':'_'+['jan','feb','mar','apr','may','jun'][parseInt(currentFillMonth)-1];
   var monthLabel = currentFillMonth==='all'?'7月':parseInt(currentFillMonth)+'月';
   ctx._chart = new Chart(ctx,{
     type:'bar',
