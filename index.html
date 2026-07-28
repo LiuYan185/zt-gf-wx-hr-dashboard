@@ -372,7 +372,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 /* 层级分布卡片 */
 .level-card-wrap{margin:10px 0 16px}
 .level-card-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between}
-.level-card{flex:1;min-width:70px;max-width:110px;background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid #eef2f7;overflow:hidden;text-align:center;transition:transform .15s,box-shadow .15s;cursor:default}
+.level-card{flex:1;min-width:90px;max-width:none;background:#fff;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid #eef2f7;overflow:hidden;text-align:center;transition:transform .15s,box-shadow .15s;cursor:default}
 .level-card:hover{transform:translateY(-2px);box-shadow:0 3px 10px rgba(0,0,0,.1)}
 .level-card-bar{height:5px;width:100%}
 .level-card-body{padding:10px 6px}
@@ -424,7 +424,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 .scroll-arrow.arr-right{right:2px}
 .scroll-arrow.hidden{opacity:0;pointer-events:none}
 /* 人员明细表 */
-.people-table{border-collapse:collapse;font-size:12px;min-width:700px}
+.people-table{width:100%;border-collapse:collapse;font-size:12px;min-width:700px}
 .people-table thead{position:sticky;top:0;z-index:5}
 .people-table thead th{background:#fff7ed;color:#7a6a50;font-weight:700;font-size:11px;padding:7px 12px;text-align:left;border-bottom:2px solid #fed7aa;white-space:nowrap}
 .people-table tbody td{padding:6px 12px;text-align:left;border-bottom:1px solid #f8f8f8;color:#374151;white-space:nowrap}
@@ -616,7 +616,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Micr
 </style>
 <meta property="og:type" content="website"/>
 <meta property="og:title" content="全球各BU人力数据看板"/>
-<meta property="og:description" content="全球各BU人力数据看板 - 2026年7月27日更新"/>
+<meta property="og:description" content="全球各BU人力数据看板 - 2026年7月28日更新"/>
 <meta property="og:url" content="https://liuyan185.github.io/zt-gf-wx-hr-dashboard/"/>
 </head>
 <body>
@@ -88882,6 +88882,29 @@ function renderHealthTable(){
     '</tr></thead><tbody>'+rows+totalRow+'</tbody></table>';
 }
 
+/* ── LBU 三级部门排序辅助 ── */
+function _chDigit(c){ return {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9}[c]||0; }
+function _chToNum(s){
+  if(s==='十') return 10;
+  if(s.indexOf('十')===0) return 10 + _chDigit(s[1]);
+  if(s.length>1 && s[1]==='十') return _chDigit(s[0])*10 + (s.length>2?_chDigit(s[2]):0);
+  return _chDigit(s[0]);
+}
+function lbuDept3Key(name){
+  var isB = /^B/.test(name);
+  // B-prefixed: group 0
+  if(isB){
+    var m = name.match(/第([一二三四五六七八九十]+)纵队/);
+    if(m) return '0_'+String(_chToNum(m[1])).padStart(3,'0');
+    return '0_ZZZ_'+name;
+  }
+  // Non-B: "第X纵队" → group 1, sorted by number
+  var m2 = name.match(/^第([一二三四五六七八九十]+)纵队/);
+  if(m2) return '1_'+String(_chToNum(m2[1])).padStart(3,'0');
+  // Others: group 2
+  return '2_'+name;
+}
+
 /* ── 三级组织对比明细 ── */
 function renderDept3Table(bu){
   var oh = D.org_hierarchy ? D.org_hierarchy[bu] : null;
@@ -88927,7 +88950,16 @@ function renderDept3Table(bu){
       return healthSortAsc? va-vb : vb-va;
     });
   } else {
-    items.sort(function(a,b){ return b.active - a.active; });
+    if(bu === 'LBU'){
+      items.sort(function(a,b){
+        var ka = lbuDept3Key(a.dept3);
+        var kb = lbuDept3Key(b.dept3);
+        if(ka !== kb) return ka < kb ? -1 : 1;
+        return b.active - a.active;
+      });
+    } else {
+      items.sort(function(a,b){ return b.active - a.active; });
+    }
   }
 
   function thArrowD3(key, label){
@@ -89327,7 +89359,7 @@ function renderHighLevel(){
 }
 </script>
 </div><!-- /capture-area -->
-<div id="level-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.84);z-index:9999;align-items:center;justify-content:center" onclick="closeLevelModal()"><div id="level-modal" onclick="event.stopPropagation()" style="background:#fff;border-radius:14px;width:620px;max-width:92vw;max-height:82vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:24px 28px"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e2e8f0"><h3 id="level-modal-title" style="font-size:15px;font-weight:700;color:#1a365d;flex:1;margin:0"></h3><div id="dept3-title-slot" style="flex-shrink:0"></div></div><div id="level-modal-body"></div><button class="lev-close-btn" onclick="closeLevelModal()">关闭</button></div></div>
+<div id="level-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.84);z-index:9999;align-items:center;justify-content:center" onclick="closeLevelModal()"><div id="level-modal" onclick="event.stopPropagation()" style="background:#fff;border-radius:14px;width:min(1000px,96vw);max-width:96vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);padding:24px 28px"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #e2e8f0"><h3 id="level-modal-title" style="font-size:15px;font-weight:700;color:#1a365d;flex:1;margin:0"></h3><div id="dept3-title-slot" style="flex-shrink:0"></div></div><div id="level-modal-body"></div><button class="lev-close-btn" onclick="closeLevelModal()">关闭</button></div></div>
 
 <!-- Export PNG Button -->
 <button class="export-btn" id="export-btn" onclick="exportPNG()" title="导出PNG">
@@ -89486,7 +89518,13 @@ function exportPNG(){
     var slot = document.getElementById('dept3-title-slot');
     if (!slot) return;
 
-    var sorted = Object.keys(d3set).sort(function(a, b) { return d3set[b] - d3set[a]; });
+    var sorted = Object.keys(d3set).sort(function(a, b) {
+      if (bu === 'LBU') {
+        var ka = lbuDept3Key(a), kb = lbuDept3Key(b);
+        if (ka !== kb) return ka < kb ? -1 : 1;
+      }
+      return d3set[b] - d3set[a];
+    });
     var html = '<select id="dept3-filter" style="font-size:12px;padding:3px 8px;border:1px solid #cbd5e0;border-radius:4px;max-width:200px;cursor:pointer;background:#fff;color:#1a365d;font-weight:600">';
     html += '<option value="all">全部三级部门 (' + people.length + ')</option>';
     sorted.forEach(function(d) {
