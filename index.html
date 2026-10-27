@@ -98305,7 +98305,7 @@ const WORLD_ZH2ISO   = {"斐济":"FJ","Fiji":"FJ","FJ":"FJ","FJI":"FJ","坦桑�
   if (typeof WORLD_MAP_PATHS === 'undefined') return;
 
   var BU_ORDER = ['LBU','FBU','ABU','PBU','GEU','GUS','HQU_HRAS','HQU_FES','HQU_技术部','HQU_其他'];
-  var VIEW_NAME = {'HQU_HRAS':'HRAS条线','HQU_FES':'FES条线','HQU_技术部':'技术部','HQU_其他':'其他'};
+  var VIEW_NAME = {};  // 1027：与其他板块保持一致，直接显示 BU 原始名称（HQU_HRAS / HQU_FES / HQU_技术部 / HQU_其他）
   function vname(b){ return VIEW_NAME[b] || b; }
   function cname(iso){ return (CD.names && CD.names[iso]) || (typeof WORLD_NAME_ZH !== 'undefined' && WORLD_NAME_ZH[iso]) || iso; }
   function fmt(n){ return (n||0).toLocaleString('en-US'); }
